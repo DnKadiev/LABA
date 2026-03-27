@@ -1,12 +1,13 @@
 package com.autoservice.controller;
 
-import com.autoservice.dto.MechanicWorkloadDto;
-import com.autoservice.dto.OrderCostDto;
+import com.autoservice.dto.TicketPurchaseRequest;
 import com.autoservice.service.BusinessService;
+import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -18,72 +19,57 @@ public class BusinessController {
         this.businessService = businessService;
     }
 
-    /**
-     * Бизнес-операция 1: Автоназначение механика с наименьшей нагрузкой.
-     * POST /api/orders/{id}/auto-assign
-     */
-    @PostMapping("/orders/{id}/auto-assign")
-    public ResponseEntity<?> autoAssign(@PathVariable Long id) {
+    @PostMapping("/screenings/{id}/tickets/purchase")
+    public ResponseEntity<?> purchaseTicket(@PathVariable Long id, @Valid @RequestBody TicketPurchaseRequest request) {
         try {
-            return ResponseEntity.ok(businessService.autoAssignMechanic(id));
+            return ResponseEntity.ok(businessService.purchaseTicket(id, request));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /**
-     * Бизнес-операция 2: Закрыть заказ-наряд.
-     * Доступно только если все обязательные работы выполнены.
-     * PUT /api/orders/{id}/close
-     */
-    @PutMapping("/orders/{id}/close")
-    public ResponseEntity<?> closeOrder(@PathVariable Long id) {
+    @PostMapping("/tickets/{id}/refund")
+    public ResponseEntity<?> refundTicket(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(businessService.closeOrder(id));
+            return ResponseEntity.ok(businessService.refundTicket(id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /**
-     * Бизнес-операция 3: Детализация стоимости заказа (работы + детали).
-     * GET /api/orders/{id}/cost
-     */
-    @GetMapping("/orders/{id}/cost")
-    public ResponseEntity<?> getOrderCost(@PathVariable Long id) {
+    @GetMapping("/screenings/{id}/occupancy")
+    public ResponseEntity<?> getScreeningOccupancy(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(businessService.getOrderCostBreakdown(id));
+            return ResponseEntity.ok(businessService.getScreeningOccupancy(id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /**
-     * Бизнес-операция 4: Нагрузка механиков.
-     * GET /api/reports/mechanics
-     */
-    @GetMapping("/reports/mechanics")
-    public List<MechanicWorkloadDto> getMechanicWorkload() {
-        return businessService.getMechanicWorkload();
+    @GetMapping("/halls/{id}/schedule")
+    public ResponseEntity<?> getHallSchedule(@PathVariable Long id,
+                                             @RequestParam(required = false)
+                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                             @RequestParam(required = false)
+                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        try {
+            return ResponseEntity.ok(businessService.getHallSchedule(id, from, to));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    /**
-     * Бизнес-операция 5: Деактивировать механика и переназначить его заказы.
-     * PUT /api/mechanics/{id}/deactivate?reassignToMechanicId={id}
-     */
-    @PutMapping("/mechanics/{id}/deactivate")
-    public ResponseEntity<?> deactivateMechanic(@PathVariable Long id,
-                                                @RequestParam Long reassignToMechanicId) {
+    @GetMapping("/movies/{id}/available-screenings")
+    public ResponseEntity<?> getAvailableScreenings(@PathVariable Long id) {
         try {
-            businessService.deactivateMechanicWithReassignment(id, reassignToMechanicId);
-            return ResponseEntity.ok("Mechanic deactivated and orders reassigned successfully");
+            return ResponseEntity.ok(businessService.getAvailableScreeningsForMovie(id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

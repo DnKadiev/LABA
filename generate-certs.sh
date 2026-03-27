@@ -1,43 +1,38 @@
 #!/bin/bash
 # =============================================================================
-# Генерация цепочки сертификатов для Support Ticket System
-# Цепочка: Root CA → Intermediate CA → Server
-#
-# ВАЖНО: Замените STUDENT_ID на номер своего студенческого билета!
-# ВАЖНО: Все сгенерированные файлы исключены из git (см. .gitignore)
+# Certificate chain generator for Cinema Booking System
+# Chain: Root CA -> Intermediate CA -> Server
 # =============================================================================
 
 set -e
 
-# Отключаем конвертацию путей в Git Bash на Windows
-# (иначе /C=RU/... превращается в C:/Program Files/Git/C=RU/...)
 export MSYS_NO_PATHCONV=1
 
-STUDENT_ID="${STUDENT_ID:-XXXXXXXX}"   # <-- подставьте свой номер или задайте env: export STUDENT_ID=12345678
+STUDENT_ID="${STUDENT_ID:-XXXXXXXX}"
 KEYSTORE_PASSWORD="${KEYSTORE_PASSWORD:-changeit}"
-VALIDITY_ROOT=3650        # 10 лет
-VALIDITY_INTERMEDIATE=1825 # 5 лет
-VALIDITY_SERVER=365        # 1 год
+VALIDITY_ROOT=3650
+VALIDITY_INTERMEDIATE=1825
+VALIDITY_SERVER=365
 
 OUTPUT_DIR="certs"
 mkdir -p "$OUTPUT_DIR"
 
-echo "=== [1/5] Генерация Root CA (Student-${STUDENT_ID}-RootCA) ==="
-openssl genrsa -out "$OUTPUT_DIR/sts-root-ca.key" 4096
+echo "=== [1/5] Generating Root CA ==="
+openssl genrsa -out "$OUTPUT_DIR/cinema-root-ca.key" 4096
 
 openssl req -new -x509 \
   -days $VALIDITY_ROOT \
-  -key "$OUTPUT_DIR/sts-root-ca.key" \
-  -out "$OUTPUT_DIR/sts-root-ca.crt" \
-  -subj "/C=RU/ST=Moscow/L=Moscow/O=SupportTicketSystem/OU=Student-${STUDENT_ID}/CN=STS-RootCA"
+  -key "$OUTPUT_DIR/cinema-root-ca.key" \
+  -out "$OUTPUT_DIR/cinema-root-ca.crt" \
+  -subj "/C=RU/ST=Moscow/L=Moscow/O=CinemaBookingSystem/OU=Student-${STUDENT_ID}/CN=Cinema-RootCA"
 
-echo "=== [2/5] Генерация Intermediate CA (Student-${STUDENT_ID}-IntermediateCA) ==="
-openssl genrsa -out "$OUTPUT_DIR/sts-intermediate-ca.key" 4096
+echo "=== [2/5] Generating Intermediate CA ==="
+openssl genrsa -out "$OUTPUT_DIR/cinema-intermediate-ca.key" 4096
 
 openssl req -new \
-  -key "$OUTPUT_DIR/sts-intermediate-ca.key" \
-  -out "$OUTPUT_DIR/sts-intermediate-ca.csr" \
-  -subj "/C=RU/ST=Moscow/L=Moscow/O=SupportTicketSystem/OU=Student-${STUDENT_ID}/CN=STS-IntermediateCA"
+  -key "$OUTPUT_DIR/cinema-intermediate-ca.key" \
+  -out "$OUTPUT_DIR/cinema-intermediate-ca.csr" \
+  -subj "/C=RU/ST=Moscow/L=Moscow/O=CinemaBookingSystem/OU=Student-${STUDENT_ID}/CN=Cinema-IntermediateCA"
 
 cat > "$OUTPUT_DIR/intermediate-ext.cnf" << EOF
 basicConstraints=CA:TRUE,pathlen:0
@@ -48,20 +43,20 @@ EOF
 
 openssl x509 -req \
   -days $VALIDITY_INTERMEDIATE \
-  -in "$OUTPUT_DIR/sts-intermediate-ca.csr" \
-  -CA "$OUTPUT_DIR/sts-root-ca.crt" \
-  -CAkey "$OUTPUT_DIR/sts-root-ca.key" \
+  -in "$OUTPUT_DIR/cinema-intermediate-ca.csr" \
+  -CA "$OUTPUT_DIR/cinema-root-ca.crt" \
+  -CAkey "$OUTPUT_DIR/cinema-root-ca.key" \
   -CAcreateserial \
-  -out "$OUTPUT_DIR/sts-intermediate-ca.crt" \
+  -out "$OUTPUT_DIR/cinema-intermediate-ca.crt" \
   -extfile "$OUTPUT_DIR/intermediate-ext.cnf"
 
-echo "=== [3/5] Генерация серверного сертификата (Student-${STUDENT_ID}-Server) ==="
-openssl genrsa -out "$OUTPUT_DIR/sts-server.key" 2048
+echo "=== [3/5] Generating server certificate ==="
+openssl genrsa -out "$OUTPUT_DIR/cinema-server.key" 2048
 
 openssl req -new \
-  -key "$OUTPUT_DIR/sts-server.key" \
-  -out "$OUTPUT_DIR/sts-server.csr" \
-  -subj "/C=RU/ST=Moscow/L=Moscow/O=SupportTicketSystem/OU=Student-${STUDENT_ID}/CN=localhost"
+  -key "$OUTPUT_DIR/cinema-server.key" \
+  -out "$OUTPUT_DIR/cinema-server.csr" \
+  -subj "/C=RU/ST=Moscow/L=Moscow/O=CinemaBookingSystem/OU=Student-${STUDENT_ID}/CN=localhost"
 
 cat > "$OUTPUT_DIR/server-ext.cnf" << EOF
 basicConstraints=CA:FALSE
@@ -72,49 +67,35 @@ EOF
 
 openssl x509 -req \
   -days $VALIDITY_SERVER \
-  -in "$OUTPUT_DIR/sts-server.csr" \
-  -CA "$OUTPUT_DIR/sts-intermediate-ca.crt" \
-  -CAkey "$OUTPUT_DIR/sts-intermediate-ca.key" \
+  -in "$OUTPUT_DIR/cinema-server.csr" \
+  -CA "$OUTPUT_DIR/cinema-intermediate-ca.crt" \
+  -CAkey "$OUTPUT_DIR/cinema-intermediate-ca.key" \
   -CAcreateserial \
-  -out "$OUTPUT_DIR/sts-server.crt" \
+  -out "$OUTPUT_DIR/cinema-server.crt" \
   -extfile "$OUTPUT_DIR/server-ext.cnf"
 
-echo "=== [4/5] Сборка цепочки и создание PKCS12 keystore ==="
-cat "$OUTPUT_DIR/sts-server.crt" \
-    "$OUTPUT_DIR/sts-intermediate-ca.crt" \
-    "$OUTPUT_DIR/sts-root-ca.crt" > "$OUTPUT_DIR/sts-chain.crt"
+echo "=== [4/5] Building PKCS12 keystore ==="
+cat "$OUTPUT_DIR/cinema-server.crt" \
+    "$OUTPUT_DIR/cinema-intermediate-ca.crt" \
+    "$OUTPUT_DIR/cinema-root-ca.crt" > "$OUTPUT_DIR/cinema-chain.crt"
 
 openssl pkcs12 -export \
-  -in "$OUTPUT_DIR/sts-server.crt" \
-  -inkey "$OUTPUT_DIR/sts-server.key" \
-  -certfile "$OUTPUT_DIR/sts-chain.crt" \
+  -in "$OUTPUT_DIR/cinema-server.crt" \
+  -inkey "$OUTPUT_DIR/cinema-server.key" \
+  -certfile "$OUTPUT_DIR/cinema-chain.crt" \
   -name server \
   -out src/main/resources/keystore.p12 \
   -passout "pass:${KEYSTORE_PASSWORD}"
 
-echo "=== [5/5] Верификация цепочки ==="
+echo "=== [5/5] Verifying certificate chain ==="
 openssl verify \
-  -CAfile "$OUTPUT_DIR/sts-root-ca.crt" \
-  -untrusted "$OUTPUT_DIR/sts-intermediate-ca.crt" \
-  "$OUTPUT_DIR/sts-server.crt"
+  -CAfile "$OUTPUT_DIR/cinema-root-ca.crt" \
+  -untrusted "$OUTPUT_DIR/cinema-intermediate-ca.crt" \
+  "$OUTPUT_DIR/cinema-server.crt"
 
 echo ""
-echo "======================================================"
-echo " Готово! Файлы созданы в директории: $OUTPUT_DIR/"
-echo " Keystore: src/main/resources/keystore.p12"
-echo "======================================================"
+echo "Certificates are ready in: $OUTPUT_DIR/"
+echo "Keystore: src/main/resources/keystore.p12"
 echo ""
-echo "Запустить приложение с HTTPS:"
+echo "Run with HTTPS:"
 echo "  SSL_ENABLED=true SSL_KEY_STORE_PASSWORD=${KEYSTORE_PASSWORD} SERVER_PORT=8443 mvn spring-boot:run"
-echo ""
-echo "Добавить Root CA в доверенные:"
-echo ""
-echo "  Windows (certlm.msc):"
-echo "    certlm.msc → Trusted Root Certification Authorities → All Tasks → Import → $OUTPUT_DIR/sts-root-ca.crt"
-echo ""
-echo "  macOS:"
-echo "    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $OUTPUT_DIR/sts-root-ca.crt"
-echo ""
-echo "  Ubuntu/Debian:"
-echo "    sudo cp $OUTPUT_DIR/sts-root-ca.crt /usr/local/share/ca-certificates/sts-root-ca.crt"
-echo "    sudo update-ca-certificates"

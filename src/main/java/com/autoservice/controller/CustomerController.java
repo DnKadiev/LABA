@@ -2,6 +2,7 @@ package com.autoservice.controller;
 
 import com.autoservice.domain.Customer;
 import com.autoservice.repository.CustomerRepository;
+import com.autoservice.repository.TicketRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,11 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerRepository customerRepository;
+    private final TicketRepository ticketRepository;
 
-    public CustomerController(CustomerRepository customerRepository) {
+    public CustomerController(CustomerRepository customerRepository, TicketRepository ticketRepository) {
         this.customerRepository = customerRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     @GetMapping
@@ -45,16 +48,21 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Customer updated) {
         return customerRepository.findById(id).map(existing -> {
-            existing.setName(updated.getName());
-            existing.setPhone(updated.getPhone());
+            existing.setFullName(updated.getFullName());
             existing.setEmail(updated.getEmail());
+            existing.setPhone(updated.getPhone());
             return ResponseEntity.ok(customerRepository.save(existing));
         }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!customerRepository.existsById(id)) return ResponseEntity.notFound().build();
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        if (!customerRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        if (ticketRepository.existsByCustomerId(id)) {
+            return ResponseEntity.badRequest().body("Customer cannot be deleted because tickets are linked to it");
+        }
         customerRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

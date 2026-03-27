@@ -36,7 +36,6 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
-                // Возвращаем 401 (а не 403) когда токен отсутствует или истёк
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -45,43 +44,38 @@ public class SecurityConfig {
                 })
             )
             .authorizeHttpRequests(auth -> auth
-                // --- Публичные ---
                 .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
-                // --- Клиенты ---
-                .requestMatchers(HttpMethod.GET, "/api/customers/**").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers("/api/customers/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/screenings/*/tickets/purchase").hasAnyRole("ADMIN", "MANAGER", "CUSTOMER")
+                .requestMatchers(HttpMethod.POST, "/api/tickets/*/refund").hasAnyRole("ADMIN", "MANAGER", "CUSTOMER")
+                .requestMatchers(HttpMethod.GET, "/api/screenings/*/occupancy").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/halls/*/schedule").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/movies/*/available-screenings").authenticated()
 
-                // --- Автомобили ---
-                .requestMatchers(HttpMethod.GET, "/api/vehicles/**").hasAnyRole("ADMIN", "MECHANIC", "CUSTOMER")
-                .requestMatchers(HttpMethod.POST, "/api/vehicles/**").hasAnyRole("ADMIN", "CUSTOMER")
-                .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasAnyRole("ADMIN", "CUSTOMER")
-                .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasRole("ADMIN")
-                .requestMatchers("/api/vehicles/**").hasRole("ADMIN") // catchall: ADMIN всегда имеет доступ
+                .requestMatchers(HttpMethod.GET, "/api/customers/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/customers/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/customers/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/customers/**").hasRole("ADMIN")
 
-                // --- Механики ---
-                .requestMatchers(HttpMethod.GET, "/api/mechanics/**").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers("/api/mechanics/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/movies/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/movies/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/movies/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/movies/**").hasRole("ADMIN")
 
-                // --- Запчасти ---
-                .requestMatchers(HttpMethod.GET, "/api/parts/**").authenticated()
-                .requestMatchers("/api/parts/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/halls/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/halls/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/halls/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/halls/**").hasRole("ADMIN")
 
-                // --- Бизнес-операции (ПЕРЕД общими правилами orders!) ---
-                .requestMatchers("/api/orders/*/auto-assign").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers("/api/orders/*/close").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers("/api/orders/*/cost").hasAnyRole("ADMIN", "MECHANIC", "CUSTOMER")
-                .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "MECHANIC")
+                .requestMatchers(HttpMethod.GET, "/api/screenings/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/screenings/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/screenings/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/screenings/**").hasRole("ADMIN")
 
-                // --- Заказ-наряды (общие правила после специфичных) ---
-                .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyRole("ADMIN", "CUSTOMER")
-                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAnyRole("ADMIN", "MECHANIC")
-                .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
-                .requestMatchers("/api/orders/**").hasRole("ADMIN") // catchall: ADMIN всегда имеет доступ
+                .requestMatchers(HttpMethod.GET, "/api/tickets/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/tickets/**").hasRole("ADMIN")
 
                 .anyRequest().authenticated()
             )

@@ -1,1511 +1,688 @@
 {
   "info": {
-    "name": "Auto Service Management System",
-    "description": "Полная коллекция запросов для системы управления автосервисом.\nHTTPS: https://localhost:8443\n\nПеременные коллекции:\n- baseUrl: https://localhost:8443\n- adminToken: заполняется автоматически при Login Admin\n- mechanicToken: заполняется автоматически при Login Mechanic\n- customerToken: заполняется автоматически при Login Customer\n\nВажно: отключите SSL-верификацию в настройках Postman (Settings -> SSL certificate verification -> OFF)",
+    "name": "Cinema Booking System",
+    "description": "Коллекция запросов для Cinema Booking System. По умолчанию используется http://localhost:8080. Для HTTPS включите SSL в приложении и смените baseUrl на https://localhost:8443.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "https://localhost:8443",
-      "type": "string"
-    },
-    {
-      "key": "adminToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "mechanicToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "customerToken",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "adminToken", "value": "" },
+    { "key": "managerToken", "value": "" },
+    { "key": "customerToken", "value": "" },
+    { "key": "customerRefreshToken", "value": "" },
+    { "key": "newCustomerId", "value": "" },
+    { "key": "newMovieId", "value": "" },
+    { "key": "newHallId", "value": "" },
+    { "key": "newScreeningId", "value": "" },
+    { "key": "purchasedTicketId", "value": "" }
   ],
   "item": [
     {
       "name": "Auth",
-      "description": "Регистрация, вход и обновление токенов",
       "item": [
         {
-          "name": "Register Admin",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin1234!\",\n  \"role\": \"ROLE_ADMIN\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Register Mechanic",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"mechanic1\",\n  \"password\": \"Mech1234!\",\n  \"role\": \"ROLE_MECHANIC\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Register Customer",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"customer1\",\n  \"password\": \"Cust1234!\",\n  \"role\": \"ROLE_CUSTOMER\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
           "name": "Login Admin",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin1234!\"\n}"
-            }
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "pm.test('Has accessToken', function() { pm.expect(json.accessToken).to.be.a('string'); });",
-                  "pm.collectionVariables.set('adminToken', json.accessToken);",
-                  "pm.collectionVariables.set('adminRefreshToken', json.refreshToken);"
+                  "pm.collectionVariables.set('adminToken', json.accessToken);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin1234!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
         },
         {
-          "name": "Login Mechanic",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"mechanic1\",\n  \"password\": \"Mech1234!\"\n}"
-            }
-          },
+          "name": "Login Manager",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "pm.collectionVariables.set('mechanicToken', json.accessToken);",
-                  "pm.collectionVariables.set('mechanicRefreshToken', json.refreshToken);"
+                  "pm.collectionVariables.set('managerToken', json.accessToken);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"manager1\",\n  \"password\": \"Cinema1234!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
         },
         {
           "name": "Login Customer",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"customer1\",\n  \"password\": \"Cust1234!\"\n}"
-            }
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
                   "pm.collectionVariables.set('customerToken', json.accessToken);",
                   "pm.collectionVariables.set('customerRefreshToken', json.refreshToken);"
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Refresh Token",
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+              "raw": "{\n  \"username\": \"customer1\",\n  \"password\": \"Cust1234!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('adminToken', json.accessToken);",
-                  "pm.collectionVariables.set('adminRefreshToken', json.refreshToken);"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "Register - Invalid Password (Error Case)",
+          "name": "Refresh Customer Token",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"baduser\",\n  \"password\": \"weak\",\n  \"role\": \"ROLE_CUSTOMER\"\n}"
+              "raw": "{\n  \"refreshToken\": \"{{customerRefreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 400', function() { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "Login - Wrong Credentials (Error Case)",
+          "name": "Register Manager",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrongpassword\"\n}"
+              "raw": "{\n  \"username\": \"manager{{$timestamp}}\",\n  \"password\": \"Cinema1234!\",\n  \"role\": \"ROLE_MANAGER\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 401', function() { pm.response.to.have.status(401); });"
-                ]
-              }
+          }
+        },
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"customer{{$timestamp}}\",\n  \"password\": \"Cust1234!\",\n  \"role\": \"ROLE_CUSTOMER\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
             }
-          ]
+          }
         }
       ]
     },
     {
       "name": "Customers",
-      "description": "CRUD операции с клиентами",
       "item": [
         {
           "name": "Get All Customers",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
             }
-          ]
-        },
-        {
-          "name": "Get Customer by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/customers/1", "host": ["{{baseUrl}}"], "path": ["api", "customers", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
           "name": "Create Customer",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Новый Клиент Тестовый\",\n  \"phone\": \"+7-999-123-4567\",\n  \"email\": \"newcustomer@example.com\"\n}"
-            }
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
                   "var json = pm.response.json();",
                   "pm.collectionVariables.set('newCustomerId', json.id);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Customer {{$timestamp}}\",\n  \"email\": \"postman{{$timestamp}}@example.com\",\n  \"phone\": \"+7900{{$timestamp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          }
         },
         {
           "name": "Update Customer",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": { "raw": "{{baseUrl}}/api/customers/1", "host": ["{{baseUrl}}"], "path": ["api", "customers", "1"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Иванов Иван Иванович (обновлено)\",\n  \"phone\": \"+7-900-100-0001\",\n  \"email\": \"ivanov@example.com\"\n}"
+              "raw": "{\n  \"fullName\": \"Updated Postman Customer\",\n  \"email\": \"updated.customer@example.com\",\n  \"phone\": \"+79001234567\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{newCustomerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{newCustomerId}}"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
           "name": "Delete Customer",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/customers/{{newCustomerId}}", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{newCustomerId}}"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 204 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Vehicles",
-      "description": "CRUD операции с автомобилями",
-      "item": [
-        {
-          "name": "Get All Vehicles",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/vehicles", "host": ["{{baseUrl}}"], "path": ["api", "vehicles"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Vehicle by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/vehicles/1", "host": ["{{baseUrl}}"], "path": ["api", "vehicles", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Vehicles by Customer",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/vehicles/customer/1", "host": ["{{baseUrl}}"], "path": ["api", "vehicles", "customer", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create Vehicle",
-          "request": {
-            "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
             ],
-            "url": { "raw": "{{baseUrl}}/api/vehicles", "host": ["{{baseUrl}}"], "path": ["api", "vehicles"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customer\": { \"id\": 1 },\n  \"make\": \"Kia\",\n  \"model\": \"Sportage\",\n  \"year\": 2023,\n  \"licensePlate\": \"Н777НН77\",\n  \"vin\": \"U5YFF24229L123456\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('newVehicleId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update Vehicle",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/vehicles/1", "host": ["{{baseUrl}}"], "path": ["api", "vehicles", "1"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"make\": \"Toyota\",\n  \"model\": \"Camry\",\n  \"year\": 2021,\n  \"licensePlate\": \"А001АА77\",\n  \"vin\": \"JT2BF22K1W0066252\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Delete Vehicle",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/vehicles/{{newVehicleId}}", "host": ["{{baseUrl}}"], "path": ["api", "vehicles", "{{newVehicleId}}"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 204 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Mechanics",
-      "description": "CRUD операции с механиками",
-      "item": [
-        {
-          "name": "Get All Mechanics",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/mechanics", "host": ["{{baseUrl}}"], "path": ["api", "mechanics"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Mechanic by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/mechanics/1", "host": ["{{baseUrl}}"], "path": ["api", "mechanics", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Active Mechanics",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/mechanics/active", "host": ["{{baseUrl}}"], "path": ["api", "mechanics", "active"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('All mechanics active', function() {",
-                  "  var mechanics = pm.response.json();",
-                  "  mechanics.forEach(function(m) {",
-                  "    pm.expect(m.active).to.be.true;",
-                  "  });",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create Mechanic",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/mechanics", "host": ["{{baseUrl}}"], "path": ["api", "mechanics"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Николай Фёдоров\",\n  \"specialization\": \"Кузовной ремонт\",\n  \"active\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('newMechanicId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update Mechanic",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/mechanics/1", "host": ["{{baseUrl}}"], "path": ["api", "mechanics", "1"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Алексей Смирнов\",\n  \"specialization\": \"Двигатель и трансмиссия\",\n  \"active\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Delete Mechanic",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/mechanics/{{newMechanicId}}", "host": ["{{baseUrl}}"], "path": ["api", "mechanics", "{{newMechanicId}}"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 204 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Parts",
-      "description": "CRUD операции с запчастями",
-      "item": [
-        {
-          "name": "Get All Parts",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/parts", "host": ["{{baseUrl}}"], "path": ["api", "parts"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Part by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{mechanicToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/parts/1", "host": ["{{baseUrl}}"], "path": ["api", "parts", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create Part",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/parts", "host": ["{{baseUrl}}"], "path": ["api", "parts"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Топливный фильтр\",\n  \"partNumber\": \"FUEL-FLT-001\",\n  \"price\": 650.00,\n  \"stockQuantity\": 20\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('newPartId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update Part",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/parts/1", "host": ["{{baseUrl}}"], "path": ["api", "parts", "1"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Масляный фильтр (улучшенный)\",\n  \"partNumber\": \"OIL-FLT-001\",\n  \"price\": 380.00,\n  \"stockQuantity\": 50\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Delete Part",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/parts/{{newPartId}}", "host": ["{{baseUrl}}"], "path": ["api", "parts", "{{newPartId}}"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 204 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Service Orders",
-      "description": "CRUD и управление заказ-нарядами",
-      "item": [
-        {
-          "name": "Get All Orders",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Response is array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Order by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Orders by Vehicle",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/vehicle/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "vehicle", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Orders by Mechanic",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{mechanicToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/mechanic/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "mechanic", "1"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Orders by Status - OPEN",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/status/OPEN", "host": ["{{baseUrl}}"], "path": ["api", "orders", "status", "OPEN"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"vehicleId\": 1,\n  \"description\": \"Диагностика двигателя. Загорелся Check Engine\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('newOrderId', json.id);",
-                  "pm.test('Status is OPEN', function() { pm.expect(json.status).to.equal('OPEN'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update Order Status to IN_PROGRESS",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/orders/{{newOrderId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "orders", "{{newOrderId}}", "status"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Status changed to IN_PROGRESS', function() { pm.expect(json.status).to.equal('IN_PROGRESS'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Add Work Item to Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/orders/{{newOrderId}}/items", "host": ["{{baseUrl}}"], "path": ["api", "orders", "{{newOrderId}}", "items"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"WORK\",\n  \"description\": \"Компьютерная диагностика двигателя\",\n  \"quantity\": 1,\n  \"unitPrice\": 800.00,\n  \"mandatory\": true\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('workItemId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Add Part Item to Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/orders/{{newOrderId}}/items", "host": ["{{baseUrl}}"], "path": ["api", "orders", "{{newOrderId}}", "items"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"PART\",\n  \"description\": \"Масляный фильтр\",\n  \"partId\": 1,\n  \"quantity\": 1,\n  \"unitPrice\": 350.00,\n  \"mandatory\": false\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('partItemId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Complete Work Item",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{mechanicToken}}" }],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{newOrderId}}/items/{{workItemId}}/complete",
+              "raw": "{{baseUrl}}/api/customers/{{newCustomerId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{newOrderId}}", "items", "{{workItemId}}", "complete"]
+              "path": ["api", "customers", "{{newCustomerId}}"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Item is completed', function() { pm.expect(json.completed).to.be.true; });"
-                ]
-              }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies"]
             }
-          ]
+          }
         },
         {
-          "name": "Delete Order",
+          "name": "Get Active Movies",
           "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/{{newOrderId}}", "host": ["{{baseUrl}}"], "path": ["api", "orders", "{{newOrderId}}"] }
-          },
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "active"]
+            }
+          }
+        },
+        {
+          "name": "Create Movie",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 204 or 404', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});"
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('newMovieId', json.id);"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Movie {{$timestamp}}\",\n  \"genre\": \"Drama\",\n  \"durationMinutes\": 124,\n  \"ageRating\": \"12+\",\n  \"description\": \"Тестовый фильм для коллекции Postman\",\n  \"releaseDate\": \"2030-01-10\",\n  \"baseTicketPrice\": 490.00,\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies"]
+            }
+          }
+        },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Postman Movie\",\n  \"genre\": \"Thriller\",\n  \"durationMinutes\": 131,\n  \"ageRating\": \"16+\",\n  \"description\": \"Обновлённый фильм\",\n  \"releaseDate\": \"2030-02-20\",\n  \"baseTicketPrice\": 550.00,\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/{{newMovieId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "{{newMovieId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Halls",
+      "item": [
+        {
+          "name": "Get All Halls",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/halls",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "halls"]
+            }
+          }
+        },
+        {
+          "name": "Create Hall",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('newHallId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hall {{$timestamp}}\",\n  \"capacity\": 60,\n  \"premium\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/halls",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "halls"]
+            }
+          }
+        },
+        {
+          "name": "Update Hall",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Hall {{$timestamp}}\",\n  \"capacity\": 72,\n  \"premium\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/halls/{{newHallId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "halls", "{{newHallId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Screenings",
+      "item": [
+        {
+          "name": "Get All Screenings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings"]
+            }
+          }
+        },
+        {
+          "name": "Get Screenings By Movie",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings/movie/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings", "movie", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Screening",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('newScreeningId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": {{newMovieId}},\n  \"hallId\": {{newHallId}},\n  \"startTime\": \"2030-06-15T19:00:00\",\n  \"ticketPrice\": 720.00,\n  \"language\": \"RU\",\n  \"formatType\": \"IMAX\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings"]
+            }
+          }
+        },
+        {
+          "name": "Update Screening",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": {{newMovieId}},\n  \"hallId\": {{newHallId}},\n  \"startTime\": \"2030-06-16T20:30:00\",\n  \"ticketPrice\": 760.00,\n  \"language\": \"EN\",\n  \"formatType\": \"2D\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings/{{newScreeningId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings", "{{newScreeningId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Screening",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings/{{newScreeningId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings", "{{newScreeningId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Get All Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            }
+          }
+        },
+        {
+          "name": "Get Tickets By Screening",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/screening/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "screening", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Tickets By Customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/customer/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "customer", "1"]
+            }
+          }
         }
       ]
     },
     {
       "name": "Business Operations",
-      "description": "Пять бизнес-операций системы управления автосервисом",
       "item": [
         {
-          "name": "1. Auto-Assign Mechanic to Order",
+          "name": "Purchase Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('purchasedTicketId', json.id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/2/auto-assign", "host": ["{{baseUrl}}"], "path": ["api", "orders", "2", "auto-assign"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Mechanic assigned', function() { pm.expect(json.mechanic).to.not.be.null; });",
-                  "pm.test('Status is IN_PROGRESS', function() { pm.expect(json.status).to.equal('IN_PROGRESS'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "2a. Close Order (Success - All Mandatory Complete)",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/3/close", "host": ["{{baseUrl}}"], "path": ["api", "orders", "3", "close"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Order is CLOSED', function() { pm.expect(json.status).to.equal('CLOSED'); });",
-                  "pm.test('closedAt is set', function() { pm.expect(json.closedAt).to.not.be.null; });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "2b. Close Order (Fail - Mandatory Items Incomplete)",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/1/close", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1", "close"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 400 (not COMPLETED or mandatory incomplete)', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([400]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "3. Get Order Cost Breakdown",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/orders/1/cost", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1", "cost"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Has orderId', function() { pm.expect(json.orderId).to.be.a('number'); });",
-                  "pm.test('Has workTotal', function() { pm.expect(json.workTotal).to.not.be.undefined; });",
-                  "pm.test('Has partsTotal', function() { pm.expect(json.partsTotal).to.not.be.undefined; });",
-                  "pm.test('Has grandTotal', function() { pm.expect(json.grandTotal).to.not.be.undefined; });",
-                  "pm.test('Has items array', function() { pm.expect(json.items).to.be.an('array'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "4. Get Mechanic Workload Report",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-            "url": { "raw": "{{baseUrl}}/api/reports/mechanics", "host": ["{{baseUrl}}"], "path": ["api", "reports", "mechanics"] }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Response is array', function() { pm.expect(json).to.be.an('array'); });",
-                  "pm.test('Each entry has mechanicId', function() {",
-                  "  json.forEach(function(entry) {",
-                  "    pm.expect(entry.mechanicId).to.be.a('number');",
-                  "    pm.expect(entry.mechanicName).to.be.a('string');",
-                  "    pm.expect(entry.totalOrders).to.be.a('number');",
-                  "  });",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "5. Deactivate Mechanic with Reassignment",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"seatNumber\": 40,\n  \"paidPrice\": 690.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/mechanics/3/deactivate?reassignToMechanicId=1",
+              "raw": "{{baseUrl}}/api/screenings/1/tickets/purchase",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "mechanics", "3", "deactivate"],
-              "query": [{ "key": "reassignToMechanicId", "value": "1" }]
+              "path": ["api", "screenings", "1", "tickets", "purchase"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "pm.test('Success message returned', function() {",
-                  "  pm.expect(pm.response.text()).to.include('successfully');",
-                  "});"
-                ]
-              }
+          }
+        },
+        {
+          "name": "Refund Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{purchasedTicketId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{purchasedTicketId}}", "refund"]
             }
-          ]
+          }
+        },
+        {
+          "name": "Get Screening Occupancy",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/screenings/1/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "screenings", "1", "occupancy"]
+            }
+          }
+        },
+        {
+          "name": "Get Hall Schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/halls/1/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "halls", "1", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "Get Available Screenings For Movie",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/1/available-screenings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "1", "available-screenings"]
+            }
+          }
         }
       ]
     },
     {
-      "name": "Full Workflow Scenario",
-      "description": "Сценарий: Регистрация → Вход → Создание клиента → Автомобиль → Заказ → Позиции → Выполнение → Закрытие",
+      "name": "Cleanup",
       "item": [
         {
-          "name": "Step 1: Register New Admin User",
+          "name": "Delete Hall",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"workflow_admin\",\n  \"password\": \"Workflow1!\",\n  \"role\": \"ROLE_ADMIN\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201 or 409 (already exists)', function() {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 2: Login as Workflow Admin",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"workflow_admin\",\n  \"password\": \"Workflow1!\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('workflowToken', json.accessToken);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 3: Create Customer",
-          "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Григорьев Василий Петрович\",\n  \"phone\": \"+7-999-777-6655\",\n  \"email\": \"grigoriev@workflow.com\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('wfCustomerId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 4: Create Vehicle for Customer",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/vehicles", "host": ["{{baseUrl}}"], "path": ["api", "vehicles"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customer\": { \"id\": {{wfCustomerId}} },\n  \"make\": \"Mazda\",\n  \"model\": \"CX-5\",\n  \"year\": 2022,\n  \"licensePlate\": \"М999МА77\",\n  \"vin\": \"JMZKF1W6900111222\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('wfVehicleId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 5: Create Service Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"vehicleId\": {{wfVehicleId}},\n  \"description\": \"Плановое ТО: замена масла, фильтров\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('wfOrderId', json.id);",
-                  "pm.test('Order status is OPEN', function() { pm.expect(json.status).to.equal('OPEN'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 6: Auto-Assign Mechanic",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{workflowToken}}" }],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/auto-assign",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "auto-assign"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Mechanic assigned', function() { pm.expect(json.mechanic).to.not.be.null; });",
-                  "pm.test('Status IN_PROGRESS', function() { pm.expect(json.status).to.equal('IN_PROGRESS'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 7: Add Mandatory Work Item",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/items",
+              "raw": "{{baseUrl}}/api/halls/{{newHallId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "items"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"WORK\",\n  \"description\": \"Замена моторного масла\",\n  \"quantity\": 1,\n  \"unitPrice\": 800.00,\n  \"mandatory\": true\n}"
+              "path": ["api", "halls", "{{newHallId}}"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('wfMandatoryItemId', json.id);"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "Step 8: Add Part Item",
+          "name": "Delete Movie",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/items",
+              "raw": "{{baseUrl}}/api/movies/{{newMovieId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "items"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"PART\",\n  \"description\": \"Моторное масло 5W-40\",\n  \"partId\": 6,\n  \"quantity\": 1,\n  \"unitPrice\": 2200.00,\n  \"mandatory\": true\n}"
+              "path": ["api", "movies", "{{newMovieId}}"]
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
-                  "var json = pm.response.json();",
-                  "pm.collectionVariables.set('wfPartItemId', json.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 9: Check Order Cost",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{workflowToken}}" }],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/cost",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "cost"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Grand total > 0', function() { pm.expect(parseFloat(json.grandTotal)).to.be.above(0); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 10: Complete Mandatory Work Item",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{workflowToken}}" }],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/items/{{wfMandatoryItemId}}/complete",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "items", "{{wfMandatoryItemId}}", "complete"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Item completed', function() { pm.expect(json.completed).to.be.true; });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 11: Complete Part Item",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{workflowToken}}" }],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/items/{{wfPartItemId}}/complete",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "items", "{{wfPartItemId}}", "complete"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 12: Move Order to COMPLETED",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{workflowToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "status"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Order is COMPLETED', function() { pm.expect(json.status).to.equal('COMPLETED'); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Step 13: Close Order",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{workflowToken}}" }],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{wfOrderId}}/close",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{wfOrderId}}", "close"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-                  "var json = pm.response.json();",
-                  "pm.test('Order is CLOSED', function() { pm.expect(json.status).to.equal('CLOSED'); });",
-                  "pm.test('closedAt is set', function() { pm.expect(json.closedAt).to.not.be.null; });"
-                ]
-              }
-            }
-          ]
+          }
         }
       ]
     }
